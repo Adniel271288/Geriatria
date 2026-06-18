@@ -1,13 +1,14 @@
 name: Publicar en GitHub Pages
 
-# Publica la web (index.html) automáticamente.
-# Para activarlo: en GitHub → Settings → Pages → Source = "GitHub Actions".
-# Luego cada cambio en la rama principal actualiza la web. También puedes
-# lanzarlo a mano desde la pestaña "Actions" (Run workflow).
+# OPCIONAL. La forma más sencilla de publicar NO necesita este workflow:
+#   GitHub → Settings → Pages → Source = "Deploy from a branch"
+#   → Branch: main · carpeta: / (root) → Save.
+#
+# Este workflow es la alternativa "GitHub Actions". Para usarlo:
+#   GitHub → Settings → Pages → Source = "GitHub Actions".
+# Luego lánzalo a mano desde la pestaña "Actions" → "Run workflow".
 
 on:
-  push:
-    branches: ["main", "master"]
   workflow_dispatch:
 
 permissions:
@@ -15,7 +16,6 @@ permissions:
   pages: write
   id-token: write
 
-# Evita despliegues simultáneos
 concurrency:
   group: "pages"
   cancel-in-progress: true
@@ -32,8 +32,6 @@ jobs:
 
       - name: Preparar GitHub Pages
         uses: actions/configure-pages@v5
-        with:
-          enablement: true
 
       - name: Subir la web (raíz del repo)
         uses: actions/upload-pages-artifact@v3
