@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0" />
+<meta name="theme-color" content="#1976D2" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="GeriShift" />
+<title>GeriShift Lleida</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  :root{
+    --bg:#F5F5F7; --card:#FFFFFF; --husm:#1976D2; --huav:#D32F2F;
+    --adjunto:#212121; --residente:#757575; --ink:#1C1C1E; --sub:#6B7280; --line:#E6E6EA;
+  }
+  html,body{ margin:0; height:100%; }
+  body{
+    background:#E4E4E9; color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .shell{
+    width:100%; max-width:400px; height:100dvh; max-height:880px;
+    background:var(--bg); overflow:hidden; display:flex; flex-direction:column; position:relative;
+  }
+  @media (min-width:480px){
+    body{ padding:24px; }
+    .shell{ border-radius:32px; box-shadow:0 20px 60px rgba(0,0,0,.25); }
+  }
+  .accent{ height:4px; display:flex; }
+  .accent>div{ flex:1; }
+  .center{ flex:1; display:flex; align-items:center; justify-content:center; color:var(--sub); font-size:13px; padding:24px; text-align:center; }
+
+  /* Login */
+  .login{ flex:1; display:flex; flex-direction:column; justify-content:center; padding:0 28px; overflow-y:auto; }
+  .brand{ display:flex; align-items:center; gap:12px; margin-bottom:28px; }
+  .brand .name{ font-size:24px; font-weight:700; letter-spacing:-.5px; }
+  .brand .sub{ font-size:12px; color:var(--sub); }
+  .logo{ border-radius:12px; overflow:hidden; display:flex; box-shadow:0 1px 3px rgba(0,0,0,.15); flex-shrink:0; }
+  .logo>div{ flex:1; }
+  .flabel{ font-size:11px; font-weight:600; color:var(--sub); margin-bottom:6px; text-transform:uppercase; letter-spacing:.04em; padding-left:4px; }
+  .input{
+    width:100%; border:1px solid var(--line); border-radius:12px; padding:11px 12px;
+    font-size:15px; background:var(--card); color:var(--ink); outline:none; font-family:inherit;
+  }
+  .input:focus{ box-shadow:0 0 0 2px rgba(25,118,210,.35); border-color:var(--husm); }
+  .err{ color:var(--huav); font-size:12px; font-weight:600; min-height:18px; margin:6px 2px; }
+  .btn-primary{ width:100%; background:var(--ink); color:#fff; border:none; border-radius:14px; padding:13px; font-size:15px; font-weight:600; cursor:pointer; }
+  .btn-primary:disabled{ opacity:.6; }
+  .note{ font-size:11px; line-height:1.5; color:var(--sub); margin-top:18px; }
+  .demobox{ background:#EAF2FB; border:1px solid #cfe0f5; color:#0f4c81; border-radius:12px; padding:10px 12px; font-size:11.5px; line-height:1.5; margin-top:16px; }
+  .demobox b{ color:#0b3a63; }
+
+  /* Header + nav */
+  header{ padding:18px 20px 12px; background:var(--card); border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; }
+  .htitle{ display:flex; align-items:center; gap:10px; }
+  .htitle .name{ font-size:18px; font-weight:700; letter-spacing:-.4px; }
+  .pill{ display:flex; align-items:center; gap:6px; border-radius:999px; padding:6px 12px; font-size:12px; font-weight:600; cursor:pointer; border:1px solid var(--line); background:var(--bg); color:var(--ink); }
+  .pill.on{ background:var(--ink); color:#fff; border-color:var(--ink); }
+  .content{ flex:1; overflow-y:auto; }
+  .demobar{ background:#FFF7E6; border-bottom:1px solid #f3e2b8; color:#7a5a00; font-size:11px; text-align:center; padding:5px 12px; }
+  nav{ display:flex; background:var(--card); border-top:1px solid var(--line); }
+  nav button{ flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; padding:9px 0; background:none; border:none; cursor:pointer; color:var(--sub); font-family:inherit; }
+  nav button.on{ color:var(--ink); }
+  nav .nlabel{ font-size:10px; }
+
+  /* Calendar */
+  .cal-wrap{ padding:16px 16px 24px; }
+  .monthbar{ display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+  .monthbar .m{ text-align:center; }
+  .monthbar .mtitle{ font-size:16px; font-weight:700; }
+  .monthbar .msub{ font-size:10px; color:var(--sub); }
+  .navbtn{ background:none; border:none; padding:8px; border-radius:999px; cursor:pointer; color:var(--sub); }
+  .dow{ display:grid; grid-template-columns:repeat(7,1fr); margin-bottom:6px; }
+  .dow div{ text-align:center; font-size:11px; font-weight:600; color:var(--sub); }
+  .grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:6px; }
+  .day{ aspect-ratio:1/1; background:var(--card); border:1px solid var(--line); border-radius:12px; display:flex; flex-direction:column; align-items:center; padding-top:6px; cursor:pointer; }
+  .day.today{ border-color:var(--ink); }
+  .day .num{ font-size:13px; font-weight:600; }
+  .dots{ display:flex; gap:4px; margin-top:4px; height:6px; }
+  .dot{ width:6px; height:6px; border-radius:999px; }
+  .legend{ margin-top:20px; background:var(--card); border:1px solid var(--line); border-radius:16px; padding:12px 16px; display:flex; flex-direction:column; gap:8px; }
+  .legend .row{ display:flex; align-items:center; gap:10px; font-size:13px; }
+  .legend .row .t{ font-weight:600; }
+  .legend .row .s{ color:var(--sub); font-size:12px; }
+
+  /* Sheets */
+  .backdrop{ position:absolute; inset:0; background:rgba(0,0,0,.42); animation:fade .25s ease; }
+  @keyframes fade{ from{opacity:0} to{opacity:1} }
+  .sheet{ position:absolute; left:0; right:0; bottom:0; background:var(--bg); border-radius:24px 24px 0 0; max-height:90%; overflow-y:auto; animation:slideup .26s cubic-bezier(.2,.8,.2,1); }
+  @keyframes slideup{ from{transform:translateY(100%)} to{transform:translateY(0)} }
+  .grab{ width:40px; height:4px; border-radius:999px; background:var(--line); margin:10px auto 4px; }
+  .sheet-body{ padding:8px 20px 26px; }
+  .sheet-head{ display:flex; align-items:baseline; justify-content:space-between; margin-bottom:16px; }
+  .sheet-title{ font-size:18px; font-weight:700; }
+  .eyebrow{ font-size:11px; font-weight:600; color:var(--sub); text-transform:uppercase; letter-spacing:.04em; }
+  .link{ background:none; border:none; color:var(--sub); font-size:13px; font-weight:600; cursor:pointer; font-family:inherit; }
+  .empty{ background:var(--card); border:1px solid var(--line); border-radius:16px; padding:26px 16px; text-align:center; font-size:13px; color:var(--sub); margin-bottom:16px; }
+  .block{ border:1px solid var(--line); border-radius:16px; overflow:hidden; margin-bottom:16px; }
+  .block-head{ padding:10px 16px; color:#fff; }
+  .block-head .bt{ font-size:14px; font-weight:700; line-height:1.2; }
+  .block-head .bs{ font-size:11px; opacity:.85; }
+  .srow{ width:100%; display:flex; align-items:center; gap:12px; padding:12px 16px; text-align:left; background:var(--card); border:none; border-top:1px solid var(--line); cursor:pointer; font-family:inherit; }
+  .srow:first-child{ border-top:none; }
+  .srow.ro{ cursor:default; }
+  .ava{ width:36px; height:36px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:12px; font-weight:700; flex-shrink:0; }
+  .srow .nm{ font-size:14px; font-weight:600; display:flex; align-items:center; gap:6px; }
+  .srow .hr{ font-size:12px; color:var(--sub); display:flex; align-items:center; gap:5px; }
+  .badge{ font-size:11px; font-weight:700; padding:2px 8px; border-radius:8px; background:var(--bg); flex-shrink:0; }
+  .grow{ flex:1; min-width:0; }
+  .chev{ color:var(--line); font-size:18px; }
+
+  /* Editor */
+  .field{ margin-bottom:16px; }
+  .locked{ border:1px solid var(--line); border-radius:12px; padding:10px 12px; background:var(--card); }
+  .locked-t{ font-size:13px; font-weight:600; }
+  .locked-s{ font-size:11px; color:var(--sub); }
+  .seg{ display:flex; gap:8px; }
+  .segbtn{ flex:1; border:1px solid var(--line); border-radius:12px; padding:10px 12px; text-align:left; background:var(--card); cursor:pointer; font-family:inherit; color:var(--ink); }
+  .segbtn b{ display:block; font-size:13px; font-weight:600; }
+  .segbtn span{ font-size:11px; color:var(--sub); }
+  .segbtn.on{ color:#fff; }
+  .segbtn.on span{ color:rgba(255,255,255,.85); }
+  .segbtn.on.husm{ background:var(--husm); border-color:var(--husm); }
+  .segbtn.on.huav{ background:var(--huav); border-color:var(--huav); }
+  .timerow{ display:flex; align-items:center; gap:8px; }
+  .dash{ color:var(--sub); }
+  .hint{ font-size:11px; color:var(--sub); margin-top:6px; }
+  .privnote{ border-radius:12px; padding:10px 12px; font-size:12px; margin-bottom:18px; }
+  .privnote.priv{ background:#FDECEC; color:var(--huav); }
+  .privnote.pub{ background:#EAF2FB; color:var(--husm); }
+  .btn-danger{ width:100%; margin-top:12px; background:var(--huav); color:#fff; border:none; border-radius:14px; padding:12px; font-size:14px; font-weight:600; cursor:pointer; }
+  .btn-outline-danger{ width:100%; margin-top:12px; background:var(--card); border:1px solid var(--line); color:var(--huav); border-radius:14px; padding:12px; font-size:14px; font-weight:600; cursor:pointer; font-family:inherit; }
+  .btn-outline{ width:100%; background:var(--card); border:1px solid var(--line); color:var(--huav); border-radius:16px; padding:13px; font-size:14px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; font-family:inherit; }
+
+  /* Settings/profile */
+  .pad{ padding:20px 16px 24px; }
+  .card{ background:var(--card); border:1px solid var(--line); border-radius:16px; }
+  .profile{ display:flex; align-items:center; gap:16px; padding:18px 20px; margin-bottom:20px; }
+  .profile .pava{ width:56px; height:56px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-size:18px; }
+  .profile .pn{ font-size:16px; font-weight:700; }
+  .profile .pr{ font-size:13px; color:var(--sub); }
+  .adminbadge{ display:inline-block; margin-top:4px; font-size:11px; font-weight:700; color:#fff; background:var(--husm); padding:2px 8px; border-radius:8px; }
+  .sectitle{ font-size:11px; font-weight:600; color:var(--sub); text-transform:uppercase; letter-spacing:.04em; margin:0 0 8px 4px; }
+  .arow{ display:flex; align-items:center; gap:12px; padding:14px 16px; border-top:1px solid var(--line); width:100%; background:var(--card); border-left:none; border-right:none; border-bottom:none; text-align:left; cursor:pointer; font-family:inherit; }
+  .arow:first-child{ border-top:none; }
+  .arow.static{ cursor:default; }
+  .arow .at{ font-size:14px; font-weight:600; }
+  .arow .ad{ font-size:12px; color:var(--sub); }
+  .switch{ width:44px; height:24px; border-radius:999px; padding:2px; border:none; cursor:pointer; flex-shrink:0; transition:background .2s; }
+  .knob{ width:20px; height:20px; border-radius:999px; background:#fff; transition:transform .2s; }
+  .check{ color:var(--husm); font-size:18px; font-weight:700; flex-shrink:0; }
+
+  /* Toast */
+  .toast{ position:absolute; left:0; right:0; bottom:72px; display:flex; justify-content:center; pointer-events:none; }
+  .toast div{ background:var(--ink); color:#fff; font-size:12.5px; font-weight:500; padding:9px 16px; border-radius:999px; box-shadow:0 6px 20px rgba(0,0,0,.25); animation:fade .2s ease; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script type="module">
+import { h, render } from 'https://esm.sh/preact@10.19.7';
+import { useState, useEffect } from 'https://esm.sh/preact@10.19.7/hooks';
+import htm from 'https://esm.sh/htm@3.1.1';
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import { getFirestore, collection, query, where, onSnapshot, addDoc, updateDoc, deleteDoc, doc, getDoc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+const html = htm.bind(h);
+
+/* =======================================================================
+   1) (OPCIONAL) PEGA AQUÍ TU CONFIGURACIÓN DE FIREBASE
+   ----------------------------------------------------------------------
+   La web FUNCIONA SIN TOCAR NADA: si no rellenas esto, arranca en
+   "modo demo" y guarda los datos en el propio móvil/navegador.
+   Cuando quieras datos REALES compartidos entre todo el equipo
+   (login de verdad, sincronización en vivo y privacidad en el
+   servidor), pega aquí los datos de tu proyecto Firebase
+   (Firebase → ⚙️ Configuración del proyecto → Tus apps → Web → copiar)
+   y la web cambiará automáticamente al modo real. Ver GUIA-GeriShift.md.
+   ======================================================================= */
+const firebaseConfig = {
+  apiKey: "PON_AQUI_TU_API_KEY",
+  authDomain: "PON_AQUI.firebaseapp.com",
+  projectId: "PON_AQUI",
+  storageBucket: "PON_AQUI.appspot.com",
+  messagingSenderId: "PON_AQUI",
+  appId: "PON_AQUI"
+};
+/* ======================================================================= */
+
+const CONFIG_OK = firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith('PON_AQUI');
+const DEMO = !CONFIG_OK;            // true = todo en el navegador, sin servidor
+let auth, db;
+if (CONFIG_OK) { const app = initializeApp(firebaseConfig); auth = getAuth(app); db = getFirestore(app); }
+
+/* ---------- Constantes ---------- */
+const HOSP = {
+  HUSM: { short:'Santa María', area:'Planta', color:'#1976D2' },
+  HUAV: { short:'Arnau de Vilanova', area:'Urgencias', color:'#D32F2F' },
+};
+const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const DOW = ['L','M','X','J','V','S','D'];
+const pad = n => String(n).padStart(2,'0');
+const dayKey = (y,m,d) => `${y}-${pad(m+1)}-${pad(d)}`;
+const mesOf = id => id.slice(0,7);
+const parseHorario = h => { const m=String(h||'').split(/[–-]/).map(s=>s.trim()); return {ini:m[0]||'15:00', fin:m[1]||'08:00'}; };
+const initials = n => String(n||'?').replace(/^(Dr|Dra)\.\s*/,'').trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase();
+const roleLabel = u => u?.rol==='adjunto' ? 'Adjunto' : (u?.nivel||'');
+const roleColor = u => u?.rol==='adjunto' ? '#212121' : '#757575';
+const isPrivateCombo = (u, hospital) => u?.rol==='residente' && hospital==='HUAV';
+const gid = () => (typeof crypto!=='undefined' && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now())+Math.random().toString(36).slice(2);
+
+function mapAuthError(code){
+  if(code==='auth/invalid-email') return 'El correo no tiene un formato válido.';
+  if(code==='auth/missing-password') return 'Introduce la contraseña.';
+  if(['auth/invalid-credential','auth/wrong-password','auth/user-not-found'].includes(code)) return 'Correo o contraseña incorrectos.';
+  if(code==='auth/too-many-requests') return 'Demasiados intentos. Espera un momento.';
+  if(code==='auth/network-request-failed') return 'Sin conexión. Revisa tu internet.';
+  return 'No se pudo iniciar sesión. Inténtalo de nuevo.';
+}
+
+/* =======================================================================
+   MODO DEMO (sin Firebase): datos en localStorage, mismos formatos
+   ======================================================================= */
+const DEMO_KEY = 'gerishift_demo_v1';
+const DEMO_SEED_USERS = [
+  { uid:'adj_001', nombre:'Dr. de Miguel',      rol:'adjunto',   nivel:'',   orden:1, email:'demiguel@ejemplo.com', admin:false },
+  { uid:'adj_002', nombre:'Dr. Arias',          rol:'adjunto',   nivel:'',   orden:2, email:'arias@ejemplo.com',    admin:false },
+  { uid:'adj_003', nombre:'Dra. Blasco',        rol:'adjunto',   nivel:'',   orden:3, email:'blasco@ejemplo.com',   admin:false },
+  { uid:'res_001', nombre:'Adniel García Cruz', rol:'residente', nivel:'R3', orden:4, email:'adniel@ejemplo.com',   admin:true  },
+  { uid:'res_002', nombre:'Toni',               rol:'residente', nivel:'R3', orden:5, email:'toni@ejemplo.com',     admin:false },
+  { uid:'res_003', nombre:'Andrea',             rol:'residente', nivel:'R4', orden:6, email:'andrea@ejemplo.com',   admin:false },
+  { uid:'res_004', nombre:'Lucero',             rol:'residente', nivel:'R4', orden:7, email:'lucero@ejemplo.com',   admin:false },
+  { uid:'res_005', nombre:'Cata',               rol:'residente', nivel:'R2', orden:8, email:'cata@ejemplo.com',     admin:false },
+  { uid:'res_006', nombre:'Lino',               rol:'residente', nivel:'R2', orden:9, email:'lino@ejemplo.com',     admin:false },
+];
+function demoSeed(){
+  const d = new Date(), y = d.getFullYear(), m = pad(d.getMonth()+1);
+  const mk = day => `${y}-${m}-${pad(day)}`;
+  const pubRaw = [
+    { dayId:mk(3),  uid:'adj_001', hospital:'HUSM', horario:'15:00 – 08:00', overnight:true },
+    { dayId:mk(8),  uid:'res_003', hospital:'HUSM', horario:'09:00 – 09:00', overnight:true },
+    { dayId:mk(12), uid:'adj_002', hospital:'HUSM', horario:'15:00 – 09:00', overnight:true },
+    { dayId:mk(20), uid:'res_005', hospital:'HUSM', horario:'09:00 – 08:00', overnight:true },
+  ];
+  const privRaw = [
+    { dayId:mk(3),  uid:'res_001', hospital:'HUAV', horario:'15:00 – 08:00', overnight:true },
+    { dayId:mk(15), uid:'res_002', hospital:'HUAV', horario:'15:00 – 08:00', overnight:true },
+  ];
+  return {
+    users: DEMO_SEED_USERS.map(u=>({...u})),
+    shifts_public:  pubRaw.map(x=>({ id:gid(), mes:mesOf(x.dayId), ...x })),
+    shifts_private: privRaw.map(x=>({ id:gid(), mes:mesOf(x.dayId), ...x })),
+    prefs: {},
+  };
+}
+function loadStore(){
+  try{ const r = localStorage.getItem(DEMO_KEY); if(r) return JSON.parse(r); }catch(e){}
+  const s = demoSeed(); saveStore(s); return s;
+}
+function saveStore(s){ try{ localStorage.setItem(DEMO_KEY, JSON.stringify(s)); }catch(e){} }
+
+/* Pub/sub para refrescar las vistas cuando cambian los datos en demo */
+const demoBus = new Set();
+function demoNotify(){ demoBus.forEach(fn=>{ try{ fn(); }catch(e){} }); }
+function demoSubscribe(fn){ demoBus.add(fn); fn(); return ()=>demoBus.delete(fn); }
+
+/* Autenticación de demo (en memoria) */
+const demoAuth = {
+  _u:null, _subs:new Set(),
+  _emit(){ this._subs.forEach(f=>{ try{ f(this._u); }catch(e){} }); },
+  onChange(cb){ this._subs.add(cb); cb(this._u); return ()=>this._subs.delete(cb); },
+  login(email){
+    const s = loadStore();
+    let u = s.users.find(x => x.email && x.email.toLowerCase() === String(email).toLowerCase());
+    if(!u) u = s.users.find(x => x.admin) || s.users[0];
+    this._u = { uid:u.uid, email };
+    this._emit();
+  },
+  switchTo(uid){
+    const s = loadStore();
+    const u = s.users.find(x => x.uid === uid); if(!u) return;
+    this._u = { uid:u.uid, email:u.email };
+    this._emit();
+  },
+  logout(){ this._u = null; this._emit(); },
+};
+
+/* =======================================================================
+   CAPA DE DATOS UNIFICADA (demo o Firebase, misma interfaz)
+   ======================================================================= */
+function xOnAuth(cb){
+  if(DEMO) return demoAuth.onChange(cb);
+  return onAuthStateChanged(auth, cb);
+}
+async function xLogin(email, pass){
+  if(DEMO){
+    const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email||'').trim());
+    if(!ok) throw new Error('Introduce un correo con formato válido.');
+    if(!String(pass||'').trim()) throw new Error('La contraseña no puede estar vacía.');
+    demoAuth.login(String(email).trim()); return;
+  }
+  return signInWithEmailAndPassword(auth, email.trim(), pass);
+}
+function xLogout(){ if(DEMO) return demoAuth.logout(); return signOut(auth); }
+
+async function xGetProfile(uid){
+  if(DEMO){ const u = loadStore().users.find(x=>x.uid===uid); return u ? {...u} : null; }
+  const snap = await getDoc(doc(db,'users_public',uid));
+  return snap.exists() ? { uid, ...snap.data() } : null;
+}
+function xOnUsers(cb){
+  if(DEMO) return demoSubscribe(()=> cb(loadStore().users.slice().sort((a,b)=>(a.orden||99)-(b.orden||99))));
+  return onSnapshot(collection(db,'users_public'),
+    s=> cb(s.docs.map(d=>({uid:d.id,...d.data()})).sort((a,b)=>(a.orden||99)-(b.orden||99))),
+    e=> console.error(e));
+}
+function xOnPublicMonth(monthStr, cb){
+  if(DEMO) return demoSubscribe(()=> cb(loadStore().shifts_public.filter(s=>s.mes===monthStr).map(s=>({...s,_coll:'shifts_public'}))));
+  const q = query(collection(db,'shifts_public'), where('mes','==',monthStr));
+  return onSnapshot(q, s=> cb(s.docs.map(d=>({id:d.id,_coll:'shifts_public',...d.data()}))), e=>console.error(e));
+}
+function xOnPrivate(monthStr, isAdmin, myUid, cb){
+  if(DEMO) return demoSubscribe(()=>{
+    let arr = loadStore().shifts_private.map(s=>({...s,_coll:'shifts_private'}));
+    arr = isAdmin ? arr.filter(s=>s.mes===monthStr) : arr.filter(s=>s.uid===myUid);
+    cb(arr);
+  });
+  const q = isAdmin
+    ? query(collection(db,'shifts_private'), where('mes','==',monthStr))
+    : query(collection(db,'shifts_private'), where('uid','==',myUid));
+  return onSnapshot(q, s=> cb(s.docs.map(d=>({id:d.id,_coll:'shifts_private',...d.data()}))), e=>console.error(e));
+}
+function xOnPrefs(uid, cb){
+  if(DEMO) return demoSubscribe(()=>{ const p = loadStore().prefs[uid]; if(p) cb(p); });
+  return onSnapshot(doc(db,'notification_preferences',uid), s=>{ if(s.exists()) cb(s.data()); }, e=>console.error(e));
+}
+async function xCreate(coll, payload){
+  if(DEMO){ const s=loadStore(); s[coll].push({ id:gid(), createdAt:Date.now(), updatedAt:Date.now(), ...payload }); saveStore(s); demoNotify(); return; }
+  await addDoc(collection(db,coll), {...payload, createdAt:serverTimestamp(), updatedAt:serverTimestamp()});
+}
+async function xUpdate(coll, id, payload){
+  if(DEMO){ const s=loadStore(); const i=s[coll].findIndex(x=>x.id===id); if(i>=0) s[coll][i]={...s[coll][i],...payload,updatedAt:Date.now()}; saveStore(s); demoNotify(); return; }
+  await updateDoc(doc(db,coll,id), {...payload, updatedAt:serverTimestamp()});
+}
+async function xRemove(coll, id){
+  if(DEMO){ const s=loadStore(); s[coll]=s[coll].filter(x=>x.id!==id); saveStore(s); demoNotify(); return; }
+  await deleteDoc(doc(db,coll,id));
+}
+async function xSetPref(uid, k, val){
+  if(DEMO){ const s=loadStore(); s.prefs[uid]={...(s.prefs[uid]||{}),[k]:val,uid}; saveStore(s); demoNotify(); return; }
+  await setDoc(doc(db,'notification_preferences',uid), {[k]:val, uid}, {merge:true});
+}
+function demoReset(){ const s=demoSeed(); saveStore(s); demoNotify(); }
+
+/* ---------- Iconos ---------- */
+const Ico = {
+  cal: html`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>`,
+  bell: html`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>`,
+  user: html`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>`,
+};
+
+function Logo({ size=40 }){
+  return html`<div class="logo" style=${`width:${size}px;height:${size}px`}><div style="background:var(--husm)"></div><div style="background:var(--huav)"></div></div>`;
+}
+
+/* =================== APP =================== */
+function App(){
+  const now = new Date();
+  const [ready,setReady] = useState(false);
+  const [user,setUser] = useState(null);
+  const [profile,setProfile] = useState(null);
+  const [profileLoaded,setProfileLoaded] = useState(false);
+  const [users,setUsers] = useState([]);
+  const [pub,setPub] = useState([]);
+  const [priv,setPriv] = useState([]);
+  const [view,setView] = useState({ y:now.getFullYear(), m:now.getMonth() });
+  const [mias,setMias] = useState(false);
+  const [tab,setTab] = useState('calendar');
+  const [selDay,setSelDay] = useState(null);
+  const [editor,setEditor] = useState(null);
+  const [toast,setToast] = useState(null);
+  const [prefs,setPrefs] = useState({ nuevoCalendario:true, cambiosGuardia:true, recordatorio24h:true, recordatorio2h:false });
+  const [email,setEmail] = useState('');
+  const [pass,setPass] = useState('');
+  const [loginErr,setLoginErr] = useState('');
+  const [busy,setBusy] = useState(false);
+
+  const isAdmin = !!(profile && profile.admin === true);
+  const myUid = user?.uid;
+  const monthStr = `${view.y}-${pad(view.m+1)}`;
+
+  /* Auth */
+  useEffect(()=>{
+    return xOnAuth(async u=>{
+      setUser(u||null); setReady(true);
+      if(u){
+        setProfileLoaded(false);
+        try{ setProfile(await xGetProfile(u.uid)); }
+        catch(e){ setProfile(null); }
+        setProfileLoaded(true);
+      } else { setProfile(null); setProfileLoaded(false); }
+    });
+  },[]);
+
+  /* Roster en vivo */
+  useEffect(()=>{ if(!user) return; return xOnUsers(setUsers); },[user]);
+
+  /* Guardias públicas del mes */
+  useEffect(()=>{ if(!user) return; return xOnPublicMonth(monthStr, setPub); },[user, monthStr]);
+
+  /* Guardias privadas (admin: todas del mes · resto: solo las propias) */
+  useEffect(()=>{ if(!user || !profileLoaded) return; return xOnPrivate(monthStr, isAdmin, myUid, setPriv); },[user, profileLoaded, isAdmin, myUid, monthStr]);
+
+  /* Preferencias de alertas */
+  useEffect(()=>{ if(!user) return; return xOnPrefs(myUid, p=>setPrefs(prev=>({...prev,...p}))); },[user, myUid]);
+
+  const uMap = Object.fromEntries(users.map(u=>[u.uid,u]));
+  const privMonth = priv.filter(s=>s.mes===monthStr);
+  const monthShifts = [...pub, ...privMonth];
+
+  function showToast(m){ setToast(m); clearTimeout(showToast._t); showToast._t=setTimeout(()=>setToast(null),2800); }
+  const canEdit = s => isAdmin || (s._coll==='shifts_private' && s.uid===myUid);
+  const openAdd = dayId => setEditor({ dayId, ini:'15:00', fin:'08:00' });
+  const openEdit = s => setEditor({ id:s.id, _coll:s._coll, dayId:s.dayId, uid:s.uid, hospital:s.hospital, ...parseHorario(s.horario) });
+
+  async function doLogin(){
+    setBusy(true); setLoginErr('');
+    try{ await xLogin(email, pass); }
+    catch(e){ setLoginErr(DEMO ? (e.message || 'No se pudo entrar.') : mapAuthError(e.code)); }
+    finally{ setBusy(false); }
+  }
+
+  async function saveShift(data){
+    const u = uMap[data.uid] || profile || { rol:'residente' };
+    const horario = `${data.ini} – ${data.fin}`;
+    const overnight = data.fin <= data.ini;
+    const targetColl = isPrivateCombo(u, data.hospital) ? 'shifts_private' : 'shifts_public';
+    const payload = { dayId:data.dayId, mes:mesOf(data.dayId), uid:data.uid, hospital:data.hospital, horario, overnight };
+    try{
+      if(data.id){
+        if(data._coll && data._coll!==targetColl){
+          await xRemove(data._coll, data.id);
+          await xCreate(targetColl, payload);
+        } else {
+          await xUpdate(targetColl, data.id, payload);
+        }
+      } else {
+        await xCreate(targetColl, payload);
+      }
+      setEditor(null);
+      const isPriv = targetColl==='shifts_private';
+      showToast(isPriv && data.uid!==myUid ? `Guardada · privada de ${u.nombre||''}` : (data.id?'Cambios guardados':'Guardia añadida'));
+    }catch(e){ console.error(e); showToast('No se pudo guardar (permisos o conexión).'); }
+  }
+  async function deleteShift(s){
+    try{ await xRemove(s._coll, s.id); setEditor(null); showToast('Guardia eliminada'); }
+    catch(e){ console.error(e); showToast('No se pudo eliminar.'); }
+  }
+  async function togglePref(k){
+    const val=!prefs[k];
+    setPrefs(p=>({...p,[k]:val}));
+    try{ await xSetPref(myUid, k, val); }catch(e){ console.error(e); }
+  }
+  function switchDemoUser(uid){ demoAuth.switchTo(uid); showToast('Cambiada la identidad de demo'); }
+  function resetDemo(){ demoReset(); showToast('Datos de demo restablecidos'); }
+
+  /* ----- Render ----- */
+  if(!ready) return html`<div class="shell"><div class="center">Cargando…</div></div>`;
+
+  if(!user) return html`<div class="shell"><div class="accent"><div style="background:var(--husm)"></div><div style="background:var(--huav)"></div></div>
+    <div class="login">
+      <div class="brand"><${Logo}/><div><div class="name">GeriShift</div><div class="sub">Guardias · Geriatría Lleida</div></div></div>
+      <div class="flabel">Correo</div>
+      <input class="input" type="email" value=${email} onInput=${e=>setEmail(e.target.value)} onKeyDown=${e=>e.key==='Enter'&&doLogin()} placeholder="nombre@correo.com" style="margin-bottom:14px"/>
+      <div class="flabel">Contraseña</div>
+      <input class="input" type="password" value=${pass} onInput=${e=>setPass(e.target.value)} onKeyDown=${e=>e.key==='Enter'&&doLogin()} placeholder="••••••••"/>
+      <div class="err">${loginErr}</div>
+      <button class="btn-primary" disabled=${busy} onClick=${doLogin}>${busy?'Entrando…':'Entrar'}</button>
+      ${DEMO
+        ? html`<div class="demobox">
+            <b>Modo demo</b> — esta web ya funciona sin configurar nada. Entra con
+            <b> cualquier correo válido</b> y cualquier contraseña.
+            <br/>· Como administrador: <b>adniel@ejemplo.com</b>
+            <br/>· Como residente: <b>toni@ejemplo.com</b>
+            <br/>Los datos se guardan solo en este dispositivo. Para datos reales
+            compartidos por todo el equipo, configura Firebase (ver GUIA-GeriShift.md).
+          </div>`
+        : html`<div class="note">Usa el correo y la contraseña que te facilitó el administrador del equipo.</div>`}
+    </div></div>`;
+
+  return html`<div class="shell">
+    <header>
+      <div class="htitle"><${Logo} size=${24}/><span class="name">GeriShift</span></div>
+      ${tab==='calendar' && html`<button class=${'pill'+(mias?' on':'')} onClick=${()=>setMias(v=>!v)}>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 6h18M6 12h12M10 18h4"/></svg> Mis guardias</button>`}
+    </header>
+    ${DEMO && html`<div class="demobar">Modo demo · datos guardados solo en este dispositivo</div>`}
+
+    <div class="content">
+      ${tab==='calendar' && html`<${CalendarView} view=${view} setView=${setView} mias=${mias} myUid=${myUid} shifts=${monthShifts} onDay=${setSelDay}/>`}
+      ${tab==='alerts' && html`<${AlertsView} prefs=${prefs} onToggle=${togglePref}/>`}
+      ${tab==='profile' && html`<${ProfileView} profile=${profile} email=${user.email} isAdmin=${isAdmin} demo=${DEMO} users=${users} myUid=${myUid} onSwitch=${switchDemoUser} onReset=${resetDemo} onLogout=${xLogout}/>`}
+    </div>
+
+    <nav>
+      <button class=${tab==='calendar'?'on':''} onClick=${()=>setTab('calendar')}>${Ico.cal}<span class="nlabel">Calendario</span></button>
+      <button class=${tab==='alerts'?'on':''} onClick=${()=>setTab('alerts')}>${Ico.bell}<span class="nlabel">Alertas</span></button>
+      <button class=${tab==='profile'?'on':''} onClick=${()=>setTab('profile')}>${Ico.user}<span class="nlabel">Perfil</span></button>
+    </nav>
+
+    ${selDay && html`<${DaySheet} dayId=${selDay} shifts=${monthShifts} uMap=${uMap} canEdit=${canEdit} onClose=${()=>setSelDay(null)} onAdd=${openAdd} onEdit=${openEdit}/>`}
+    ${editor && html`<${Editor} initial=${editor} isAdmin=${isAdmin} me=${profile||{uid:myUid,nombre:user.email,rol:'residente'}} users=${users} onSave=${saveShift} onDelete=${deleteShift} onClose=${()=>setEditor(null)}/>`}
+    ${toast && html`<div class="toast"><div>${toast}</div></div>`}
+  </div>`;
+}
+
+/* =================== Calendario =================== */
+function CalendarView({ view, setView, mias, myUid, shifts, onDay }){
+  const { y, m } = view;
+  const startCol = (new Date(y,m,1).getDay()+6)%7;
+  const days = new Date(y,m+1,0).getDate();
+  const cells = [...Array(startCol).fill(null), ...Array.from({length:days},(_,i)=>i+1)];
+  while(cells.length%7!==0) cells.push(null);
+  const t = new Date();
+  const isToday = d => d && t.getFullYear()===y && t.getMonth()===m && t.getDate()===d;
+  const onDayShifts = id => shifts.filter(s=>s.dayId===id);
+  const move = delta => { let nm=m+delta, ny=y; if(nm<0){nm=11;ny--;} else if(nm>11){nm=0;ny++;} setView({y:ny,m:nm}); };
+
+  return html`<div class="cal-wrap">
+    <div class="monthbar">
+      <button class="navbtn" onClick=${()=>move(-1)} aria-label="Mes anterior"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <div class="m"><div class="mtitle">${MESES[m]} ${y}</div><div class="msub">Toca un día para ver o añadir guardias</div></div>
+      <button class="navbtn" onClick=${()=>move(1)} aria-label="Mes siguiente"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>
+    </div>
+    <div class="dow">${DOW.map(d=>html`<div key=${d}>${d}</div>`)}</div>
+    <div class="grid">
+      ${cells.map((d,i)=>{
+        if(!d) return html`<div key=${'e'+i} style="aspect-ratio:1/1"></div>`;
+        const id = dayKey(y,m,d);
+        const ss = onDayShifts(id);
+        const mine = ss.some(s=>s.uid===myUid);
+        const dim = mias && !mine ? .15 : 1;
+        return html`<button key=${id} class=${'day'+(isToday(d)?' today':'')} style=${`opacity:${dim}`} onClick=${()=>onDay(id)}>
+          <span class="num">${d}</span>
+          <div class="dots">${ss.slice(0,3).map((s,k)=>html`<span key=${k} class="dot" style=${`background:${HOSP[s.hospital]?.color||'#999'}`}></span>`)}</div>
+        </button>`;
+      })}
+    </div>
+    <div class="legend">
+      <div class="row"><span class="dot" style="background:var(--husm)"></span><span class="t">Santa María</span><span class="s">· Planta</span></div>
+      <div class="row"><span class="dot" style="background:var(--huav)"></span><span class="t">Arnau de Vilanova</span><span class="s">· Urgencias</span></div>
+    </div>
+  </div>`;
+}
+
+/* =================== Detalle del día =================== */
+function DaySheet({ dayId, shifts, uMap, canEdit, onClose, onAdd, onEdit }){
+  const ss = shifts.filter(s=>s.dayId===dayId);
+  const [yy,mm,dd] = dayId.split('-').map(Number);
+  const fecha = `${dd} de ${MESES[mm-1]} de ${yy}`;
+  const blocks = ['HUSM','HUAV'].map(h=>({
+    hospital:h,
+    items: ss.filter(s=>s.hospital===h).sort((a,b)=>((uMap[a.uid]?.orden)||99)-((uMap[b.uid]?.orden)||99))
+  })).filter(b=>b.items.length);
+
+  return html`<div class="backdrop" onClick=${onClose}></div>
+  <div class="sheet"><div class="grab"></div><div class="sheet-body">
+    <div class="sheet-head"><div><div class="eyebrow">Guardias del día</div><div class="sheet-title">${fecha}</div></div><button class="link" onClick=${onClose}>Cerrar</button></div>
+    ${blocks.length===0 && html`<div class="empty">No hay guardias este día. Añade la primera abajo.</div>`}
+    ${blocks.map(b=>{
+      const meta = HOSP[b.hospital];
+      return html`<div key=${b.hospital} class="block">
+        <div class="block-head" style=${`background:${meta.color}`}><div class="bt">${meta.short}</div><div class="bs">${meta.area}</div></div>
+        ${b.items.map(s=>{
+          const u = uMap[s.uid] || { nombre:'Usuario', rol:'residente' };
+          const editable = canEdit(s);
+          const priv = u.rol==='residente' && s.hospital==='HUAV';
+          return html`<button key=${s.id} class=${'srow'+(editable?'':' ro')} onClick=${editable?(()=>onEdit(s)):undefined}>
+            <span class="ava" style=${`background:${roleColor(u)}`}>${initials(u.nombre)}</span>
+            <div class="grow"><div class="nm">${u.nombre}${priv?html` <span style="color:var(--sub)">🔒</span>`:''}</div>
+              <div class="hr">${s.overnight?'🌙 ':''}${s.horario}</div></div>
+            <span class="badge" style=${`color:${roleColor(u)}`}>${roleLabel(u)}</span>
+            ${editable?html`<span class="chev">›</span>`:''}
+          </button>`;
+        })}
+      </div>`;
+    })}
+    <button class="btn-primary" onClick=${()=>onAdd(dayId)}>+ Añadir guardia</button>
+  </div></div>`;
+}
+
+/* =================== Editor =================== */
+function Editor({ initial, isAdmin, me, users, onSave, onDelete, onClose }){
+  const fixedSelf = !isAdmin;
+  const initUid = initial.uid || (fixedSelf ? me.uid : (users[0]?.uid || me.uid));
+  const [uid,setUid] = useState(initUid);
+  const [date,setDate] = useState(initial.dayId);
+  const selUser = users.find(u=>u.uid===uid) || (uid===me.uid?me:null) || {rol:'residente', nombre:'—'};
+  const isAdj = selUser.rol==='adjunto';
+  const [hospital,setHospital] = useState(fixedSelf ? 'HUAV' : (initial.hospital || (isAdj?'HUSM':'HUAV')));
+  const [ini,setIni] = useState(initial.ini || '15:00');
+  const [fin,setFin] = useState(initial.fin || '08:00');
+  const [confirmDel,setConfirmDel] = useState(false);
+
+  const effHosp = fixedSelf ? 'HUAV' : (isAdj ? 'HUSM' : hospital);
+  const priv = selUser.rol==='residente' && effHosp==='HUAV';
+  const overnight = fin <= ini;
+  const editing = !!initial.id;
+
+  function onPerson(v){ setUid(v); const u=users.find(x=>x.uid===v); if(u?.rol==='adjunto') setHospital('HUSM'); }
+  const nombreSel = selUser.nombre || me.nombre;
+
+  return html`<div class="backdrop" onClick=${onClose}></div>
+  <div class="sheet"><div class="grab"></div><div class="sheet-body">
+    <div class="sheet-head"><div class="sheet-title">${editing?'Editar guardia':'Nueva guardia'}</div><button class="link" onClick=${onClose}>Cancelar</button></div>
+
+    <div class="field"><div class="flabel">Fecha</div>
+      <input class="input" type="date" value=${date} onInput=${e=>setDate(e.target.value)}/></div>
+
+    <div class="field"><div class="flabel">Persona</div>
+      ${fixedSelf
+        ? html`<div class="locked"><div class="locked-t">${me.nombre||me.email||'Tú'}</div><div class="locked-s">Tus guardias de Urgencias del Arnau (privadas)</div></div>`
+        : html`<select class="input" value=${uid} onChange=${e=>onPerson(e.target.value)}>
+            <optgroup label="Adjuntos">${users.filter(u=>u.rol==='adjunto').map(u=>html`<option key=${u.uid} value=${u.uid}>${u.nombre}</option>`)}</optgroup>
+            <optgroup label="Residentes">${users.filter(u=>u.rol==='residente').map(u=>html`<option key=${u.uid} value=${u.uid}>${u.nombre} · ${u.nivel}</option>`)}</optgroup>
+          </select>`}
+    </div>
+
+    <div class="field"><div class="flabel">Lugar</div>
+      ${fixedSelf
+        ? html`<div class="locked"><div class="locked-t">Arnau de Vilanova</div><div class="locked-s">Urgencias · privada</div></div>`
+        : isAdj
+          ? html`<div class="locked"><div class="locked-t">Santa María</div><div class="locked-s">Planta · los adjuntos solo hacen guardia aquí</div></div>`
+          : html`<div class="seg">
+              <button class=${'segbtn huav'+(effHosp==='HUAV'?' on':'')} onClick=${()=>setHospital('HUAV')}><b>Arnau</b><span>Urgencias</span></button>
+              <button class=${'segbtn husm'+(effHosp==='HUSM'?' on':'')} onClick=${()=>setHospital('HUSM')}><b>Santa María</b><span>Planta</span></button>
+            </div>`}
+    </div>
+
+    <div class="field"><div class="flabel">Horario</div>
+      <div class="timerow">
+        <input class="input" type="time" value=${ini} onInput=${e=>setIni(e.target.value)}/>
+        <span class="dash">–</span>
+        <input class="input" type="time" value=${fin} onInput=${e=>setFin(e.target.value)}/>
+      </div>
+      ${overnight && html`<div class="hint">🌙 Termina al día siguiente (+1)</div>`}
+    </div>
+
+    <div class=${'privnote '+(priv?'priv':'pub')}>${priv?`🔒 Privada · solo la verá ${nombreSel}`:'👥 Pública · la verá todo el equipo'}</div>
+
+    <button class="btn-primary" onClick=${()=>onSave({id:initial.id,_coll:initial._coll,dayId:date,uid,hospital:effHosp,ini,fin})}>${editing?'Guardar cambios':'Añadir guardia'}</button>
+    ${editing && (confirmDel
+      ? html`<button class="btn-danger" onClick=${()=>onDelete(initial)}>🗑 Tocar de nuevo para eliminar</button>`
+      : html`<button class="btn-outline-danger" onClick=${()=>setConfirmDel(true)}>Eliminar guardia</button>`)}
+  </div></div>`;
+}
+
+/* =================== Alertas =================== */
+function AlertsView({ prefs, onToggle }){
+  const items = [
+    ['nuevoCalendario','Nuevo cuadrante publicado','Aviso cuando se publica el mes.'],
+    ['cambiosGuardia','Cambios en mi guardia','Si modifican una guardia tuya.'],
+    ['recordatorio24h','Recordatorio 24 h antes','El día previo a tu guardia.'],
+    ['recordatorio2h','Recordatorio 2 h antes','Justo antes de empezar.'],
+  ];
+  return html`<div class="pad">
+    <div style="font-size:18px;font-weight:700;margin-bottom:4px">Alertas</div>
+    <p style="font-size:12px;color:var(--sub);margin:0 0 16px">Elige qué avisos quieres recibir.</p>
+    <div class="card">
+      ${items.map(([k,t,d])=>html`<div key=${k} class="arow static"><div class="grow"><div class="at">${t}</div><div class="ad">${d}</div></div>
+        <button class="switch" style=${`background:${prefs[k]?'#1976D2':'#D1D1D6'}`} onClick=${()=>onToggle(k)}><div class="knob" style=${`transform:translateX(${prefs[k]?'20px':'0'})`}></div></button>
+      </div>`)}
+    </div>
+    <p style="font-size:11px;color:var(--sub);margin-top:16px;line-height:1.5">El envío de notificaciones push se activará en una fase posterior.</p>
+  </div>`;
+}
+
+/* =================== Perfil =================== */
+function ProfileView({ profile, email, isAdmin, demo, users, myUid, onSwitch, onReset, onLogout }){
+  const [confirmReset,setConfirmReset] = useState(false);
+  const u = profile || {};
+  const name = u.nombre || email;
+  const sub = !profile ? 'Perfil no dado de alta' : (u.rol==='adjunto'?'Adjunto · Geriatría':`Residente ${u.nivel||''} · Geriatría`);
+  return html`<div class="pad">
+    <div class="card profile">
+      <div class="pava" style=${`background:${roleColor(u)}`}>${initials(name)}</div>
+      <div><div class="pn">${name}</div><div class="pr">${sub}</div>${isAdmin?html`<span class="adminbadge">Administrador</span>`:''}</div>
+    </div>
+    ${!profile && html`<div class="empty" style="margin-bottom:20px">Tu cuenta funciona, pero aún no estás en el listado del equipo. Pide al administrador que te dé de alta para que aparezcan tu nombre y tus guardias.</div>`}
+    ${isAdmin && html`<div class="empty" style="margin-bottom:20px;text-align:left">Como administrador ves <b>todas</b> las guardias (incluidas las privadas) y puedes gestionarlas. El resto del equipo solo ve las públicas y las suyas privadas.</div>`}
+
+    ${demo && html`<div>
+      <div class="sectitle">Ver el calendario como (demo)</div>
+      <div class="card" style="margin-bottom:20px">
+        ${users.map(p=>html`<button key=${p.uid} class="arow" onClick=${()=>onSwitch(p.uid)}>
+          <span class="ava" style=${`background:${roleColor(p)}`}>${initials(p.nombre)}</span>
+          <div class="grow"><div class="at">${p.nombre}</div><div class="ad">${p.rol==='adjunto'?'Adjunto':p.nivel}${p.admin?' · Administrador':''}</div></div>
+          ${p.uid===myUid?html`<span class="check">✓</span>`:''}
+        </button>`)}
+      </div>
+      <div class="sectitle">Datos de demo</div>
+      <button class="btn-outline" style="color:var(--sub);margin-bottom:20px" onClick=${()=> confirmReset ? (onReset(), setConfirmReset(false)) : setConfirmReset(true)}>
+        ${confirmReset ? 'Tocar de nuevo para borrar todo y restablecer la demo' : 'Restablecer datos de demo'}
+      </button>
+    </div>`}
+
+    <button class="btn-outline" onClick=${onLogout}>
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+      Cerrar sesión</button>
+  </div>`;
+}
+
+render(html`<${App}/>`, document.getElementById('app'));
+</script>
+</body>
+</html>

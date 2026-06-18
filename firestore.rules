@@ -1,0 +1,46 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAuth() { return request.auth != null; }
+    function myUid()  { return request.auth.uid; }
+
+    // Es administrador si su documento en users_public tiene admin == true
+    function isAdmin() {
+      return isAuth()
+        && exists(/databases/$(database)/documents/users_public/$(myUid()))
+        && get(/databases/$(database)/documents/users_public/$(myUid())).data.admin == true;
+    }
+
+    // -------- Listado del equipo --------
+    // Cualquier usuario autenticado lo puede leer.
+    // Solo el administrador lo edita desde la app (la consola de Firebase siempre puede).
+    match /users_public/{uid} {
+      allow read:  if isAuth();
+      allow write: if isAdmin();
+    }
+
+    // -------- Guardias públicas (Santa María y adjuntos) --------
+    // Todo el equipo las lee. Solo el administrador las crea, edita o borra.
+    match /shifts_public/{id} {
+      allow read:   if isAuth();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // -------- Guardias privadas (residente en Urgencias del Arnau) --------
+    // Solo las puede leer su dueño (o el administrador).
+    // Cada usuario puede crear/editar/borrar las suyas; el administrador, las de cualquiera.
+    match /shifts_private/{id} {
+      allow read:   if isAuth() && (resource.data.uid == myUid() || isAdmin());
+      allow create: if isAuth() && (request.resource.data.uid == myUid() || isAdmin());
+      allow update, delete: if isAuth() && (resource.data.uid == myUid() || isAdmin());
+    }
+
+    // -------- Preferencias de alertas --------
+    // Cada usuario gestiona únicamente las suyas.
+    match /notification_preferences/{uid} {
+      allow read, write: if isAuth() && uid == myUid();
+    }
+  }
+}
